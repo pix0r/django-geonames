@@ -37,5 +37,5 @@ at ~94mb). So you might want to do `load_geonames` over night.
     you might need (and more)
 4. `python manage.py compress_geonames` -- This will gzip the downloaded
     data, to minimize disk I/O during sql read.
- 5. `python manage.py load_geonames` -- Load the data.
-    6. Hours later: have fun ;-)
+5. `python manage.py load_geonames` -- Load the data.
+6. Hours later: have fun ;-)
