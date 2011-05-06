@@ -68,9 +68,6 @@ class Geoname(models.Model):
             return self
 
 class Alternate(models.Model):
-    class Meta:
-        ordering = ('-preferred',)
-
     alternateid = models.PositiveIntegerField(primary_key=True, unique=True)
     geoname = models.ForeignKey(Geoname, related_name='alternate_names')
     isolanguage = models.CharField(max_length=7)
@@ -79,6 +76,9 @@ class Alternate(models.Model):
     short = models.BooleanField()
 
     objects = models.GeoManager()
+
+    class Meta:
+        ordering = ('-preferred',)
 
     def __unicode__(self):
         return self.geoname.name
