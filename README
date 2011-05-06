@@ -4,5 +4,6 @@ GeoDjango.  To get started download the necessary data (read
 `INSTALLED_APPS`, and run the following management commands.
 These commands will take a while to run.
 
+   $ ./manage.py download_geonames
    $ ./manage.py compress_geonames
    $ ./manage.py load_geonames
