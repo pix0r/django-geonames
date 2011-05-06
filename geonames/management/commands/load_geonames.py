@@ -14,7 +14,7 @@ GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
 
 # OSX <= 10.6.7 zcat is broken, use gzcat instead
 # let's hope 10.7 fixes this FINALLY
-if platform.mac_ver()[0] == '':
+if platform.mac_ver()[0] != '':
     CAT_CMD = 'gzcat'
 else:
     CAT_CMD = 'zcat'
