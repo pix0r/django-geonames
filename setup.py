@@ -9,5 +9,6 @@ setup(name='django-geonames',
       author_email='jbronn@geodjango.org',
       url='https://github.com/ramusus/django-geonames/',
       packages=['geonames', 'geonames.management', 'geonames.management.commands'],
+      package_data={'geonames': ['sql']},
 )
 
