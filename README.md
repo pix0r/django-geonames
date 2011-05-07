@@ -29,7 +29,10 @@ Installation
 
 Note that running all this can take some serious time. The database is
 pretty huge (~200mb WITHOUT alternateNames, which itself weights in 
-at ~94mb). So you might want to do `load_geonames` over night.
+at ~94mb). So you might want to do `load_geonames` over night, it did
+take my macbook 18h28min to complete with a default 5200rpm drive,
+you might find it a hell lot faster with a 7200rpm drive or some
+SSD.
 
 1. Add `geonames` to your `INSTALLED_APPS`
 2. `python manage.py syncdb` so it creates the tables
