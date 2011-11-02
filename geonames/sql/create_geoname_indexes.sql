@@ -1,4 +1,4 @@
-CREATE INDEX "geonames_geoname_point_id" ON "geonames_geoname" USING GIST ( "point" GIST_GEOMETRY_OPS );
+CREATE INDEX "geonames_geoname_point_id" ON "geonames_geoname" USING GIST ("point");
 CREATE INDEX "geonames_geoname_name" ON "geonames_geoname" ("name");
 CREATE INDEX "geonames_geoname_fclass" ON "geonames_geoname" ("fclass");
 CREATE INDEX "geonames_geoname_fcode" ON "geonames_geoname" ("fcode");
