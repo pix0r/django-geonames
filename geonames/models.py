@@ -69,7 +69,7 @@ class Geoname(models.Model):
     topo = models.IntegerField(db_index=True)
     timezone = models.CharField(max_length=30, blank=True)
     moddate = models.DateField('Date of Last Modification')
-    point = models.PointField(null=True)
+    point = models.PointField(null=True, geography=True, spatial_index=True)
 
     objects = GeonameManager()
 
