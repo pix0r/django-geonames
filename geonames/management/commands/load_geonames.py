@@ -1,4 +1,4 @@
-import datetime, os, sys
+import datetime, os, sys, platform
 from optparse import make_option
 
 from django.db import connection, models
@@ -11,6 +11,13 @@ Alternate = m.Alternate
 Geoname = m.Geoname
 GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'data'))
 GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
+
+# OSX <= 10.6.7 zcat is broken, use gzcat instead
+# let's hope 10.7 fixes this FINALLY
+if platform.mac_ver()[0] != '':
+    CAT_CMD = 'gzcat'
+else:
+    CAT_CMD = 'zcat'
 
 def get_cmd_options():
     "Obtains the command-line PostgreSQL connection options for shell commands."
@@ -59,8 +66,9 @@ class Command(NoArgsCommand):
         # overhead from using the ORM.  Moreover, copying from a gzipped file
         # reduces disk I/O.
         copy_sql = "COPY %s (geonameid,name,alternates,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,topo,timezone,moddate,point) FROM STDIN;" % db_table
-        copy_cmd = 'zcat %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
-        copy_args = {'gz_file' : os.path.join(GEONAMES_DATA, 'allCountries.gz'),
+        copy_cmd = '%(cat_command)s %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
+        copy_args = {'cat_command': CAT_CMD,
+                     'gz_file' : os.path.join(GEONAMES_DATA, 'allCountries.gz'),
                      'db_opts' : db_opts,
                      'copy_sql' : copy_sql
                      }
@@ -81,8 +89,9 @@ class Command(NoArgsCommand):
 
         db_table = Alternate._meta.db_table
         copy_sql = "COPY %s (alternateid,geoname_id,isolanguage,variant,preferred,short) FROM STDIN;" % db_table
-        copy_cmd = 'zcat %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
-        copy_args = {'gz_file' : os.path.join(GEONAMES_DATA, 'alternateNames.gz'),
+        copy_cmd = '%(cat_command)s %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
+        copy_args = {'cat_command': CAT_CMD,
+                     'gz_file' : os.path.join(GEONAMES_DATA, 'alternateNames.gz'),
                      'db_opts' : get_cmd_options(),
                      'copy_sql' : copy_sql
                      }
