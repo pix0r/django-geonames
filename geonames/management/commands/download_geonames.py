@@ -37,7 +37,7 @@ def download(url, filepath=False):
             return
 
     local_file = open(filepath, 'w')
-    readSize = int(web_file_size) / 50
+    readSize = 102400
     bytesRead = 0
     while True:
         read = web_file.read(readSize)
@@ -47,7 +47,10 @@ def download(url, filepath=False):
 
         local_file.write(read)
 
-        print 'Downloaded %s of %s' % (bytesRead, web_file_size)
+        progress = 'Downloaded %s of %s' % (bytesRead, web_file_size)
+        sys.stdout.write(progress)
+        sys.stdout.write('\b' * len(progress))
+        sys.stdout.flush()
 
     web_file.close()
     local_file.close()
