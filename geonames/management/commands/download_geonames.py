@@ -52,6 +52,7 @@ def download(url, filepath=False):
         sys.stdout.write('\b' * len(progress))
         sys.stdout.flush()
 
+    sys.stdout.write('\n')
     web_file.close()
     local_file.close()
 
