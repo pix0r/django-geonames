@@ -37,7 +37,18 @@ def download(url, filepath=False):
             return
 
     local_file = open(filepath, 'w')
-    local_file.write(web_file.read())
+    readSize = int(web_file_size) / 50
+    bytesRead = 0
+    while True:
+        read = web_file.read(readSize)
+        bytesRead += len(read)
+        if not read:
+            break
+
+        local_file.write(read)
+
+        print 'Downloaded %s of %s' % (bytesRead, web_file_size)
+
     web_file.close()
     local_file.close()
 
