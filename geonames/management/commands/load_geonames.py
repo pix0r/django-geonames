@@ -43,6 +43,8 @@ class Command(NoArgsCommand):
                     help='Disable loading of the Geonames alternate names data.'),
         make_option('--no-geonames', action='store_true', dest='no_geonames', default=False,
                     help='Disable loading of the Geonames data.'),
+        make_option('--no-postalcodes', action='store_true', dest='no_postalcodes', default=False,
+                    help='Disable loading of the postal code data.'),
         )
 
     def handle_noargs(self, **options):
@@ -104,6 +106,28 @@ class Command(NoArgsCommand):
             os.system(copy_cmd % copy_args)
             print('Finished PostgreSQL `COPY` from Geonames alternate names data file.')
             fromfile_args['sql_file'] = os.path.join(GEONAMES_SQL, 'create_alternate_indexes.sql')
+            print(fromfile_cmd % fromfile_args)
+            os.system(fromfile_cmd % fromfile_args)
+
+        ### COPY'ing into the Geonames alternate table ###
+
+        db_table = Alternate._meta.db_table
+        copy_sql = "COPY %s (countrycode, postalcode, placename, admin1name, admin1code, admin2name, admin2code, admin3name, admin3code, latitude, longitude, accuracy) FROM STDIN;" % db_table
+        copy_cmd = '%(cat_command)s %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
+        copy_args = {'cat_command': CAT_CMD,
+                     'gz_file' : os.path.join(GEONAMES_DATA_PC, 'allCountries.gz'),
+                     'db_opts' : get_cmd_options(),
+                     'copy_sql' : copy_sql
+                     }
+
+        if not options['no_postalcodes']:
+            fromfile_args['sql_file'] = os.path.join(GEONAMES_SQL, 'drop_postalcode_indexes.sql')
+            print(fromfile_cmd % fromfile_args)
+            os.system(fromfile_cmd % fromfile_args)
+            print(copy_cmd % copy_args)
+            os.system(copy_cmd % copy_args)
+            print('Finished PostgreSQL `COPY` from Geonames postal code data file.')
+            fromfile_args['sql_file'] = os.path.join(GEONAMES_SQL, 'create_postalcode_indexes.sql')
             print(fromfile_cmd % fromfile_args)
             os.system(fromfile_cmd % fromfile_args)
 
