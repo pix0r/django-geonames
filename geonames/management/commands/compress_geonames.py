@@ -5,6 +5,7 @@ from django.core.management.base import NoArgsCommand
 
 from geonames import models
 GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(models.__file__), 'data'))
+GEONAMES_DATA_PC = os.path.join(GEONAMES_DATA, 'pc'))
 
 class Command(NoArgsCommand):
     

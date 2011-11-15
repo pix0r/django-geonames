@@ -10,6 +10,7 @@ from django.conf import settings
 from compress_geonames import GEONAMES_DATA
 
 GEONAMES_DUMPS_URL = 'http://download.geonames.org/export/dump/'
+GEONAMES_PC_DUMPS_URL = 'http://download.geonames.org/export/zip/'
 
 def download(url, filepath=False):
     """
@@ -68,6 +69,8 @@ class Command(NoArgsCommand):
                     help='Disable loading of the Geonames alternate names data.'),
         make_option('--no-geonames', action='store_true', dest='no_geonames', default=False,
                     help='Disable loading of the Geonames data.'),
+        make_option('--no-postalcodes', action='store_true', dest='no_postalcodes', default=False,
+                    help='Disable loading of the postal codes data.'),
         )
 
     def handle_noargs(self, **options):
@@ -86,6 +89,17 @@ class Command(NoArgsCommand):
 
             print '\nStart download "%s" file' % file
             download(urlparse.urljoin(GEONAMES_DUMPS_URL, file), os.path.join(GEONAMES_DATA, file))
+
+        if options['no_postalcodes'] == False:
+                print '\nLooking for postalcode data to download'
+                postalcodeResponse = urllib2.urlopen(urllib2.Request(url=GEONAMES_PC_DUMPS_URL))
+                postalcodeFiles = re.findall(r'\<a href="(.+\.(?:txt|zip))"\>', postalcodeResponse.read())
+                for file in postalcodeFiles:
+                    if file != 'allCountries.zip':
+                        continue
+
+                    print '\nStart download "%s" file' % file
+                    download(urlparse.urljoin(GEONAMES_PC_DUMPS_URL, file), os.path.join(GEONAMES_DATA_PC, file))
 
         if options['time']:
             print '\nCompleted in %s' % (datetime.datetime.now() - start_time)
