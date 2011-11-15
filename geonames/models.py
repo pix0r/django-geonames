@@ -106,3 +106,22 @@ class Alternate(models.Model):
 
     def __unicode__(self):
         return self.geoname.name
+
+class PostalCode(models.Model):
+    countrycode = models.CharField(max_length=2)
+    postalcode  = models.CharField(max_length=20)
+    placename   = models.CharField(max_length=180)
+    admin1name  = models.CharField(max_length=100)
+    admin1code  = models.CharField(max_length=20)
+    admin2name  = models.CharField(max_length=100)
+    admin2code  = models.CharField(max_length=20)
+    admin3name  = models.CharField(max_length=100)
+    admin3code  = models.CharField(max_length=20)
+    latitude    = models.FloatField()
+    longitude   = models.FloatField()
+    accuracy    = models.SmallIntegerField()
+
+    objects = models.GeoManager()
+
+    def __unicode__(self):
+        return self.placename
