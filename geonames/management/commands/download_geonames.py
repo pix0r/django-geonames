@@ -25,12 +25,15 @@ def download(url, filepath=False):
 
     # check size of files
     web_file_size = web_file.info().getheaders("Content-Length")[0]
+    web_file_size = int(web_file_size)
     if os.path.isfile(filepath):
         existing_file = open(filepath, "r")
         existing_file_size = len(existing_file.read())
         print existing_file_size, web_file_size
         if existing_file_size == web_file_size:
-            existing_file_size.close()
+            existing_file.close()
+            web_file.close()
+            print 'Skiping. File sizes match.'
             return
 
     local_file = open(filepath, 'w')
