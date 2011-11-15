@@ -5,7 +5,7 @@ from django.core.management.base import NoArgsCommand
 
 from geonames import models
 GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(models.__file__), 'data'))
-GEONAMES_DATA_PC = os.path.join(GEONAMES_DATA, 'pc'))
+GEONAMES_DATA_PC = os.path.join(GEONAMES_DATA, 'pc')
 
 class Command(NoArgsCommand):
     
@@ -18,6 +18,8 @@ class Command(NoArgsCommand):
                     help='Do not perform compression on allCountries.zip'),
         make_option('--no-alternates', action='store_true', dest='no_alternates', default=False,
                     help='Do not perform compression on alternateNames.zip'),
+        make_option('--no-postalcodes', action='store_true', dest='no_postalcodes', default=False,
+                    help='Do not perform compression on postalcodes allCountries.zip'),
                     )
 
     clear_line = chr(27) + '[2K' + chr(27) +'[G'
@@ -119,6 +121,41 @@ class Command(NoArgsCommand):
             for fld in len_fields:
                 sys.stdout.write('%s:\t%d\n' % (fld, lengths[fld]))
 
+    def postalCodes(self, **options):
+        zf = zipfile.ZipFile(os.path.join(GEONAMES_DATA_PC, 'allCountries.zip'))
+        gzf = gzip.GzipFile(os.path.join(GEONAMES_DATA_PC, 'allCountries.gz'), 'w')
+
+        in_fields = ['countrycode', 'postalcode', 'placename', 'admin1name', 'admin1code', 'admin2name', 'admin2code', 'admin3name', 'admin3code', 'latitude', 'longitude', 'accuracy']
+        len_fields = ['countrycode', 'postalcode', 'placename', 'admin1name', 'admin1code', 'admin2name', 'admin2code', 'admin3name', 'admin3code']
+        out_fields = in_fields
+        if options['lengths']:
+            lengths = dict([(f, 0) for f in len_fields])
+
+        contents = zf.read('allCountries.txt').split('\n')
+        num_lines = len(contents)
+        for i, line in enumerate(contents):
+            if line:
+                row = dict(zip(in_fields, map(str.strip, line.split('\t'))))
+                if options['lengths']:
+                    for k in len_fields:
+                        lengths[k] = max(len(row[k]), lengths[k])
+
+                new_line = '\t'.join([row[k] for k in out_fields])
+                new_line += '\n'
+                gzf.write(new_line)
+
+                if i % 10000 == 0:
+                    sys.stdout.write(self.clear_line)
+                    sys.stdout.write('Compressing allCountries.txt: %.2f%% (%d/%d)' % ( (100. * i) / num_lines, i, num_lines))
+                    sys.stdout.flush()
+
+        gzf.close()
+
+        sys.stdout.write('\n')
+
+        if options['lengths']:
+            for fld in len_fields:
+                sys.stdout.write('%s:\t%d\n' % (fld, lengths[fld]))
 
     def handle_noargs(self, **options):
         if options['time']:
@@ -129,6 +166,9 @@ class Command(NoArgsCommand):
 
         if not options['no_alternates']:
             self.alternateNames(**options)
+
+        if not options['no_postalcodes']:
+            self.postalCodes(**options)
 
         if options['time']: 
             sys.stdout.write('\nCompleted in %s\n' % (datetime.datetime.now() - start_time))
