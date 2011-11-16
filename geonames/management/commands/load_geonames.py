@@ -9,6 +9,7 @@ from django.conf import settings
 from geonames import models as m
 Alternate = m.Alternate
 Geoname = m.Geoname
+PostalCode = m.PostalCode
 GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'data'))
 GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
 
@@ -111,7 +112,7 @@ class Command(NoArgsCommand):
 
         ### COPY'ing into the Geonames alternate table ###
 
-        db_table = Alternate._meta.db_table
+        db_table = PostalCode._meta.db_table
         copy_sql = "COPY %s (countrycode, postalcode, placename, admin1name, admin1code, admin2name, admin2code, admin3name, admin3code, latitude, longitude, accuracy) FROM STDIN;" % db_table
         copy_cmd = '%(cat_command)s %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
         copy_args = {'cat_command': CAT_CMD,
