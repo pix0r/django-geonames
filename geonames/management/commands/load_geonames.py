@@ -6,11 +6,11 @@ from django.core.management import call_command, sql, color
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
 
+from compress_geonames import GEONAMES_DATA, GEONAMES_DATA_PC
 from geonames import models as m
 Alternate = m.Alternate
 Geoname = m.Geoname
 PostalCode = m.PostalCode
-GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'data'))
 GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
 
 # OSX <= 10.6.7 zcat is broken, use gzcat instead
