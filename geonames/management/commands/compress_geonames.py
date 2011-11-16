@@ -140,6 +140,12 @@ class Command(NoArgsCommand):
                     for k in len_fields:
                         lengths[k] = max(len(row[k]), lengths[k])
 
+                if row['latitude'] == '' or row['longitude'] == '':
+                    continue
+
+                if row['accuracy'] == '':
+                    row['accuracy'] = '0'
+
                 new_line = '\t'.join([row[k] for k in out_fields])
                 new_line += '\n'
                 gzf.write(new_line)
