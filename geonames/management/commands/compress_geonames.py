@@ -1,14 +1,20 @@
-import datetime, gzip, os, sys, zipfile
+import datetime
+import gzip
+import os
+import sys
+import zipfile
 from optparse import make_option
 
 from django.core.management.base import NoArgsCommand
 
 from geonames import models
-GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(models.__file__), 'data'))
+
+GEONAMES_DATA = os.path.abspath(
+    os.path.join(os.path.dirname(models.__file__), 'data'))
 GEONAMES_DATA_PC = os.path.join(GEONAMES_DATA, 'pc')
 
+
 class Command(NoArgsCommand):
-    
     option_list = NoArgsCommand.option_list + (
         make_option('-t', '--time', action='store_true', dest='time', default=False,
                     help='Print the total time in running this command'),
@@ -20,8 +26,7 @@ class Command(NoArgsCommand):
                     help='Do not perform compression on alternateNames.zip'),
         make_option('--no-postalcodes', action='store_true', dest='no_postalcodes', default=False,
                     help='Do not perform compression on postalcodes allCountries.zip'),
-                    )
-
+    )
     clear_line = chr(27) + '[2K' + chr(27) +'[G'
 
     def allCountries(self, **options):
@@ -29,13 +34,14 @@ class Command(NoArgsCommand):
         gzf = gzip.GzipFile(os.path.join(GEONAMES_DATA, 'allCountries.gz'), 'w')
 
         in_fields = ['geonameid', 'name', 'asciiname', 'alternates', 'latitude', 'longitude',
-                     'fclass', 'fcode', 'country_code', 'cc2', 
+                     'fclass', 'fcode', 'country_code', 'cc2',
                      'admin1', 'admin2', 'admin3', 'admin4',
                      'population', 'elevation', 'topo', 'timezone', 'mod_date']
         out_fields = [f for f in in_fields if not f in ('latitude', 'longitude', 'asciiname')]
         len_fields = ['name', 'asciiname', 'alternates', 'fclass', 'fcode', 'country_code',
                       'cc2', 'admin1', 'admin2', 'admin3', 'admin4', 'timezone']
-        if options['lengths']: lengths = dict([(f, 0) for f in len_fields])
+        if options['lengths']:
+            lengths = dict([(f, 0) for f in len_fields])
 
         contents = zf.read('allCountries.txt').split('\n')
         num_lines = len(contents)
@@ -43,20 +49,22 @@ class Command(NoArgsCommand):
             if line:
                 row = dict(zip(in_fields, map(str.strip, line.split('\t'))))
                 if options['lengths']:
-                    for k in len_fields: lengths[k] = max(len(row[k]), lengths[k])
-                    
+                    for k in len_fields:
+                        lengths[k] = max(len(row[k]), lengths[k])
+
                 # fixing trailing slash problem in geonames data
                 try:
                     if row['name'][-1:] == "\\":
                         row['name'] = row['name'][0:-1]
                 except:
                     pass
-                    
+
                 try:
                     # Setting integers to 0 so they won't have to be NULL.
                     for key in ('population', 'elevation', 'topo'):
-                        if not row[key]: row[key] = '0'  
-                
+                        if not row[key]:
+                            row[key] = '0'
+
                     # Getting the EWKT for the point -- has to be EWKT or else
                     # the insertion of the point will raise a constraint error for
                     # for a non-matching ID.
@@ -71,7 +79,8 @@ class Command(NoArgsCommand):
 
             if i % 10000 == 0:
                 sys.stdout.write(self.clear_line)
-                sys.stdout.write('Compressing allCountries.txt: %.2f%% (%d/%d)' % ( (100. * i) / num_lines, i, num_lines))
+                sys.stdout.write('Compressing allCountries.txt: %.2f%% (%d/%d)' %
+                                 ((100. * i) / num_lines, i, num_lines))
                 sys.stdout.flush()
 
         gzf.close()
@@ -90,7 +99,8 @@ class Command(NoArgsCommand):
         bool_fields = ['preferred', 'short']
         len_fields = ['isolanguage', 'variant']
         out_fields = in_fields
-        if options['lengths']: lengths = dict([(f, 0) for f in len_fields])
+        if options['lengths']:
+            lengths = dict([(f, 0) for f in len_fields])
 
         contents = zf.read('alternateNames.txt').split('\n')
         num_lines = len(contents)
@@ -103,14 +113,16 @@ class Command(NoArgsCommand):
                     else:
                         row[bool_field] = '0'
                 if options['lengths']:
-                    for k in len_fields: lengths[k] = max(len(row[k]), lengths[k])
+                    for k in len_fields:
+                        lengths[k] = max(len(row[k]), lengths[k])
                 new_line = '\t'.join([row[k] for k in out_fields])
                 new_line += '\n'
                 gzf.write(new_line)
 
                 if i % 10000 == 0:
                     sys.stdout.write(self.clear_line)
-                    sys.stdout.write('Compressing alternateNames.txt: %.2f%% (%d/%d)' % ( (100. * i) / num_lines, i, num_lines))
+                    sys.stdout.write('Compressing alternateNames.txt: %.2f%% (%d/%d)' %
+                                     ((100. * i) / num_lines, i, num_lines))
                     sys.stdout.flush()
 
         gzf.close()
@@ -152,7 +164,8 @@ class Command(NoArgsCommand):
 
                 if i % 10000 == 0:
                     sys.stdout.write(self.clear_line)
-                    sys.stdout.write('Compressing allCountries.txt: %.2f%% (%d/%d)' % ( (100. * i) / num_lines, i, num_lines))
+                    sys.stdout.write('Compressing allCountries.txt: %.2f%% (%d/%d)' %
+                                     ((100. * i) / num_lines, i, num_lines))
                     sys.stdout.flush()
 
         gzf.close()
@@ -176,5 +189,5 @@ class Command(NoArgsCommand):
         if not options['no_postalcodes']:
             self.postalCodes(**options)
 
-        if options['time']: 
+        if options['time']:
             sys.stdout.write('\nCompleted in %s\n' % (datetime.datetime.now() - start_time))

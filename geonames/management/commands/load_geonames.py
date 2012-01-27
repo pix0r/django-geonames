@@ -1,8 +1,8 @@
-import datetime, os, sys, platform
+import datetime
+import os
 from optparse import make_option
 
-from django.db import connection, models
-from django.core.management import call_command, sql, color
+from django.core.management import call_command
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
 
@@ -11,7 +11,10 @@ from geonames import models as m
 Alternate = m.Alternate
 Geoname = m.Geoname
 PostalCode = m.PostalCode
-GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
+
+GEONAMES_SQL = os.path.abspath(
+    os.path.join(os.path.dirname(m.__file__), 'sql'))
+
 
 def get_cmd_options():
     "Obtains the command-line PostgreSQL connection options for shell commands."
@@ -28,8 +31,8 @@ def get_cmd_options():
         options += '-p %s ' % db_settings['PORT']
     return options
 
-class Command(NoArgsCommand):
 
+class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('-t', '--time', action='store_true', dest='time', default=False,
                     help='Print the total time in running this command'),
@@ -39,10 +42,11 @@ class Command(NoArgsCommand):
                     help='Disable loading of the Geonames data.'),
         make_option('--no-postalcodes', action='store_true', dest='no_postalcodes', default=False,
                     help='Disable loading of the postal code data.'),
-        )
+    )
 
     def handle_noargs(self, **options):
-        if options['time']: start_time = datetime.datetime.now()
+        if options['time']:
+            start_time = datetime.datetime.now()
 
         # Making sure the db tables exist.
         call_command('syncdb')
@@ -51,8 +55,9 @@ class Command(NoArgsCommand):
         db_opts = get_cmd_options()
 
         fromfile_cmd = 'psql %(db_opts)s -f %(sql_file)s'
-        fromfile_args = {'db_opts' : db_opts,
-                         }
+        fromfile_args = {
+            'db_opts': db_opts,
+        }
 
         ### COPY'ing into the Geonames table ###
 
@@ -63,10 +68,11 @@ class Command(NoArgsCommand):
         # reduces disk I/O.
         copy_sql = "COPY %s (geonameid,name,alternates,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,topo,timezone,moddate,point) FROM STDIN;" % db_table
         copy_cmd = 'gunzip -c %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
-        copy_args = {'gz_file' : os.path.join(GEONAMES_DATA, 'allCountries.gz'),
-                     'db_opts' : db_opts,
-                     'copy_sql' : copy_sql
-                     }
+        copy_args = {
+            'gz_file': os.path.join(GEONAMES_DATA, 'allCountries.gz'),
+            'db_opts': db_opts,
+            'copy_sql': copy_sql,
+        }
 
         # Printing the copy command and executing it.
         if not options['no_geonames']:
@@ -85,10 +91,11 @@ class Command(NoArgsCommand):
         db_table = Alternate._meta.db_table
         copy_sql = "COPY %s (alternateid,geoname_id,isolanguage,variant,preferred,short) FROM STDIN;" % db_table
         copy_cmd = 'gunzip -c %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
-        copy_args = {'gz_file' : os.path.join(GEONAMES_DATA, 'alternateNames.gz'),
-                     'db_opts' : get_cmd_options(),
-                     'copy_sql' : copy_sql
-                     }
+        copy_args = {
+            'gz_file': os.path.join(GEONAMES_DATA, 'alternateNames.gz'),
+            'db_opts': get_cmd_options(),
+            'copy_sql': copy_sql,
+        }
 
         if not options['no_alternates']:
             fromfile_args['sql_file'] = os.path.join(GEONAMES_SQL, 'drop_alternate_indexes.sql')
@@ -106,10 +113,11 @@ class Command(NoArgsCommand):
         db_table = PostalCode._meta.db_table
         copy_sql = "COPY %s (countrycode, postalcode, placename, admin1name, admin1code, admin2name, admin2code, admin3name, admin3code, latitude, longitude, accuracy) FROM STDIN;" % db_table
         copy_cmd = 'gunzip -c %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
-        copy_args = {'gz_file' : os.path.join(GEONAMES_DATA_PC, 'allCountries.gz'),
-                     'db_opts' : get_cmd_options(),
-                     'copy_sql' : copy_sql
-                     }
+        copy_args = {
+            'gz_file': os.path.join(GEONAMES_DATA_PC, 'allCountries.gz'),
+            'db_opts': get_cmd_options(),
+            'copy_sql': copy_sql,
+        }
 
         if not options['no_postalcodes']:
             fromfile_args['sql_file'] = os.path.join(GEONAMES_SQL, 'drop_postalcode_indexes.sql')
@@ -123,4 +131,5 @@ class Command(NoArgsCommand):
             os.system(fromfile_cmd % fromfile_args)
 
         # Done
-        if options['time']: print('\nCompleted in %s' % (datetime.datetime.now() - start_time))
+        if options['time']:
+            print('\nCompleted in %s' % (datetime.datetime.now() - start_time))
