@@ -81,7 +81,7 @@ class Command(NoArgsCommand):
 
         db_table = Alternate._meta.db_table
         copy_sql = "COPY %s (alternateid,geoname_id,isolanguage,variant,preferred,short) FROM STDIN;" % db_table
-        copy_cmd = 'zcat %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
+        copy_cmd = 'gunzip -c %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'
         copy_args = {'gz_file' : os.path.join(GEONAMES_DATA, 'alternateNames.gz'),
                      'db_opts' : get_cmd_options(),
                      'copy_sql' : copy_sql
