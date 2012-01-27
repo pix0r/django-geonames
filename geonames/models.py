@@ -69,7 +69,7 @@ class Geoname(models.Model):
     topo = models.IntegerField(db_index=True)
     timezone = models.CharField(max_length=30, blank=True)
     moddate = models.DateField('Date of Last Modification')
-    point = models.PointField(null=True)
+    point = models.PointField(null=True, geography=True, spatial_index=True)
 
     objects = GeonameManager()
 
@@ -92,9 +92,6 @@ class Geoname(models.Model):
             return self
 
 class Alternate(models.Model):
-    class Meta:
-        ordering = ('-preferred',)
-
     alternateid = models.PositiveIntegerField(primary_key=True, unique=True)
     geoname = models.ForeignKey(Geoname, related_name='alternate_names')
     isolanguage = models.CharField(max_length=7)
@@ -104,5 +101,27 @@ class Alternate(models.Model):
 
     objects = models.GeoManager()
 
+    class Meta:
+        ordering = ('-preferred',)
+
     def __unicode__(self):
         return self.geoname.name
+
+class PostalCode(models.Model):
+    countrycode = models.CharField(max_length=2)
+    postalcode  = models.CharField(max_length=20)
+    placename   = models.CharField(max_length=180)
+    admin1name  = models.CharField(max_length=100)
+    admin1code  = models.CharField(max_length=20)
+    admin2name  = models.CharField(max_length=100)
+    admin2code  = models.CharField(max_length=20)
+    admin3name  = models.CharField(max_length=100)
+    admin3code  = models.CharField(max_length=20)
+    latitude    = models.FloatField()
+    longitude   = models.FloatField()
+    accuracy    = models.SmallIntegerField()
+
+    objects = models.GeoManager()
+
+    def __unicode__(self):
+        return self.placename
