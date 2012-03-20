@@ -7,9 +7,9 @@ from django.core.management.base import NoArgsCommand
 from django.conf import settings
 
 from geonames import models as m
+from compress_geonames import GEONAMES_DATA
 Alternate = m.Alternate
 Geoname = m.Geoname
-GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'data'))
 GEONAMES_SQL = os.path.abspath(os.path.join(os.path.dirname(m.__file__), 'sql'))
 
 def get_cmd_options():
@@ -25,6 +25,9 @@ def get_cmd_options():
         options += '-h %s ' % db_settings['HOST']
     if db_settings['PORT']:
         options += '-p %s ' % db_settings['PORT']
+    if db_settings['PASSWORD']:
+        os.environ['PGPASSWORD'] = db_settings['PASSWORD']
+        
     return options
 
 class Command(NoArgsCommand):
