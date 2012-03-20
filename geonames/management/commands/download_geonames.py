@@ -9,7 +9,10 @@ from django.core.management.base import NoArgsCommand
 from django.conf import settings
 from compress_geonames import GEONAMES_DATA
 
-GEONAMES_DUMPS_URL = 'http://download.geonames.org/export/dump/'
+GEONAMES_DUMPS_URL = getattr(settings,
+        'GEONAMES_DUMPS_URL',
+        'http://download.geonames.org/export/dump/',
+        )
 
 def download(url, filepath=False):
     """

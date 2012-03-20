@@ -2,9 +2,14 @@ import datetime, gzip, os, sys, zipfile
 from optparse import make_option
 
 from django.core.management.base import NoArgsCommand
+from django.conf import settings
 
 from geonames import models
-GEONAMES_DATA = os.path.abspath(os.path.join(os.path.dirname(models.__file__), 'data'))
+
+GEONAMES_DATA = getattr(settings,
+        'GEONAMES_DATA',
+        os.path.abspath(os.path.join(os.path.dirname(models.__file__), 'data'))
+        )
 
 class Command(NoArgsCommand):
     
