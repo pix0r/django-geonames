@@ -8,6 +8,7 @@ from django.conf import settings
 
 from compress_geonames import GEONAMES_DATA, GEONAMES_DATA_PC
 from geonames import models as m
+
 Alternate = m.Alternate
 Geoname = m.Geoname
 PostalCode = m.PostalCode
@@ -108,8 +109,24 @@ class Command(NoArgsCommand):
             print(fromfile_cmd % fromfile_args)
             os.system(fromfile_cmd % fromfile_args)
 
-        ### COPY'ing into the Geonames alternate table ###
+            # cursor = connection.cursor()
+            # list_sql = []
+            # insert_sql = []
+            # for language in settings.LANGUAGES:
+            #     insert_sql.append('name_%s' % language[0])
+            # for language in settings.LANGUAGES:
+            #     list_sql.append("(SELECT variant FROM geonames_alternate "
+            #                     "WHERE geoname_id=geonameid AND isolanguage='%s' "
+            #                     "ORDER BY preferred DESC LIMIT 1) AS name_%s" %
+            #                     (language[0], language[0]))
+            # denorm_sql = (
+            #     "INSERT INTO geonames_localname (geoname_id, %s) "
+            #     "SELECT geonameid, %s FROM geonames_geoname" %
+            #     (", ".join(insert_sql), ", ".join(list_sql)))
+            # cursor.execute(denorm_sql)
 
+
+        ### COPY'ing into the Geonames alternate table ###
         db_table = PostalCode._meta.db_table
         copy_sql = "COPY %s (countrycode, postalcode, placename, admin1name, admin1code, admin2name, admin2code, admin3name, admin3code, latitude, longitude, accuracy) FROM STDIN;" % db_table
         copy_cmd = 'gunzip -c %(gz_file)s | psql %(db_opts)s -c "%(copy_sql)s"'

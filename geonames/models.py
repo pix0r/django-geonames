@@ -98,6 +98,15 @@ class Geoname(models.Model):
     class Meta:
         ordering = ('name', 'country')
 
+# class LocalName(models.Model):
+#     uuid = UUIDField(auto=True)
+#     language = models.CharField(max_length=20, db_index=True)
+#     name = models.CharField(max_length=255)
+#     value = models.TextField()
+# 
+#     def __unicode__(self):
+#         return self.name
+
 
 class Alternate(models.Model):
     alternateid = models.PositiveIntegerField(primary_key=True, unique=True)
