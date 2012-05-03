@@ -11,5 +11,5 @@ setup(name='django-geonames',
       packages = find_packages(),
       package_data = {
           'geonames' : ['sql/*.sql']
-      }
+      },
 )

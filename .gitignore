@@ -1,3 +1,4 @@
 build/
 dist/
 geonames/data
+*.egg-info

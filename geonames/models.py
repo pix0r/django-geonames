@@ -8,7 +8,7 @@ class Admin1Code(models.Model):
     objects = models.GeoManager()
 
     def __unicode__(self):
-        return u': '.join([self.code, self.name])
+        return u': '.join([unicode(self.code), unicode(self.name)])
 
 
 class Admin2Code(models.Model):
@@ -18,7 +18,7 @@ class Admin2Code(models.Model):
     objects = models.GeoManager()
 
     def __unicode__(self):
-        return u': '.join([self.code, self.name])
+        return u': '.join([unicode(self.code), unicode(self.name)])
 
 
 class TimeZone(models.Model):
@@ -44,6 +44,12 @@ class GeonameManager(models.GeoManager):
         Filter returns only continents
         """
         return self.filter(fcode__in=['CONT']).filter(*args, **kwargs)
+
+    def cities(self, *args, **kwargs):
+        """
+        Filter returns only cities and other populated places
+        """
+        return self.filter(fcode__in=['PPL']).filter(*args, **kwargs)
 
 
 class Geoname(models.Model):
@@ -76,6 +82,9 @@ class Geoname(models.Model):
     def is_continent(self):
         return self.fcode == 'CONT'
 
+    def is_populated(self):
+        return self.fcode == 'PPL'
+
     def get_country(self):
         if not self.is_country():
             try:
@@ -85,6 +94,9 @@ class Geoname(models.Model):
                 return None
         else:
             return self
+
+    class Meta:
+        ordering = ('name', 'country')
 
 
 class Alternate(models.Model):
