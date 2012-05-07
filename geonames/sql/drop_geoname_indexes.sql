@@ -1,8 +1,8 @@
-DROP INDEX "geonames_geoname_point_id"; 
-DROP INDEX "geonames_geoname_name"; 
+DROP INDEX "geonames_geoname_point_id";
+DROP INDEX "geonames_geoname_name";
 DROP INDEX "geonames_geoname_fclass";
 DROP INDEX "geonames_geoname_fcode";
-DROP INDEX "geonames_geoname_country"; 
+DROP INDEX "geonames_geoname_country";
 DROP INDEX "geonames_geoname_admin1";
 DROP INDEX "geonames_geoname_admin2";
 DROP INDEX "geonames_geoname_admin3";

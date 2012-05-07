@@ -1,15 +1,5 @@
 from django.contrib.gis.db import models
-from django.conf import settings
 
-class BigIntegerField(models.PositiveIntegerField):
-    def db_type(self, connection):
-        return 'bigint'
-
-if 'south' in settings.INSTALLED_APPS:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^geonames\.models\.BigIntegerField"])
-
-### Geonames.org Models ###
 
 class Admin1Code(models.Model):
     code = models.CharField(max_length=6)
@@ -18,7 +8,8 @@ class Admin1Code(models.Model):
     objects = models.GeoManager()
 
     def __unicode__(self):
-        return u': '.join([self.code, self.name])
+        return u': '.join([unicode(self.code), unicode(self.name)])
+
 
 class Admin2Code(models.Model):
     code = models.CharField(max_length=32)
@@ -27,7 +18,8 @@ class Admin2Code(models.Model):
     objects = models.GeoManager()
 
     def __unicode__(self):
-        return u': '.join([self.code, self.name])
+        return u': '.join([unicode(self.code), unicode(self.name)])
+
 
 class TimeZone(models.Model):
     tzid = models.CharField(max_length=30)
@@ -39,18 +31,26 @@ class TimeZone(models.Model):
     def __unicode__(self):
         return self.tzid
 
+
 class GeonameManager(models.GeoManager):
     def countries(self, *args, **kwargs):
-        '''
+        """
         Filter returns only countries
-        '''
-        return super(GeonameManager, self).filter(fcode__in=['PCLI']).filter(*args, **kwargs)
+        """
+        return self.filter(fcode__in=['PCLI']).filter(*args, **kwargs)
 
     def continents(self, *args, **kwargs):
-        '''
+        """
         Filter returns only continents
-        '''
-        return super(GeonameManager, self).filter(fcode__in=['CONT']).filter(*args, **kwargs)
+        """
+        return self.filter(fcode__in=['CONT']).filter(*args, **kwargs)
+
+    def cities(self, *args, **kwargs):
+        """
+        Filter returns only cities and other populated places
+        """
+        return self.filter(fcode__in=['PPL']).filter(*args, **kwargs)
+
 
 class Geoname(models.Model):
     geonameid = models.PositiveIntegerField(primary_key=True, unique=True)
@@ -64,12 +64,12 @@ class Geoname(models.Model):
     admin2 = models.CharField(max_length=80, blank=True, db_index=True)
     admin3 = models.CharField(max_length=20, blank=True, db_index=True)
     admin4 = models.CharField(max_length=20, blank=True, db_index=True)
-    population = BigIntegerField(db_index=True)
+    population = models.BigIntegerField(db_index=True)
     elevation = models.IntegerField(db_index=True)
     topo = models.IntegerField(db_index=True)
     timezone = models.CharField(max_length=30, blank=True)
     moddate = models.DateField('Date of Last Modification')
-    point = models.PointField(null=True)
+    point = models.PointField(null=True, geography=True, spatial_index=True)
 
     objects = GeonameManager()
 
@@ -82,19 +82,33 @@ class Geoname(models.Model):
     def is_continent(self):
         return self.fcode == 'CONT'
 
+    def is_populated(self):
+        return self.fcode == 'PPL'
+
     def get_country(self):
         if not self.is_country():
             try:
-                return self.__class__.objects.get(fcode='PCLI', country=self.country)
+                return self.__class__.objects.get(
+                    fcode='PCLI', country=self.country)
             except self.__class__.DoesNotExist:
                 return None
         else:
             return self
 
-class Alternate(models.Model):
     class Meta:
-        ordering = ('-preferred',)
+        ordering = ('name', 'country')
 
+# class LocalName(models.Model):
+#     uuid = UUIDField(auto=True)
+#     language = models.CharField(max_length=20, db_index=True)
+#     name = models.CharField(max_length=255)
+#     value = models.TextField()
+# 
+#     def __unicode__(self):
+#         return self.name
+
+
+class Alternate(models.Model):
     alternateid = models.PositiveIntegerField(primary_key=True, unique=True)
     geoname = models.ForeignKey(Geoname, related_name='alternate_names')
     isolanguage = models.CharField(max_length=7)
@@ -104,5 +118,28 @@ class Alternate(models.Model):
 
     objects = models.GeoManager()
 
+    class Meta:
+        ordering = ('-preferred',)
+
     def __unicode__(self):
         return self.geoname.name
+
+
+class PostalCode(models.Model):
+    countrycode = models.CharField(max_length=2)
+    postalcode = models.CharField(max_length=20)
+    placename = models.CharField(max_length=180)
+    admin1name = models.CharField(max_length=100)
+    admin1code = models.CharField(max_length=20)
+    admin2name = models.CharField(max_length=100)
+    admin2code = models.CharField(max_length=20)
+    admin3name = models.CharField(max_length=100)
+    admin3code = models.CharField(max_length=20)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    accuracy = models.SmallIntegerField()
+
+    objects = models.GeoManager()
+
+    def __unicode__(self):
+        return self.placename
