@@ -7,6 +7,7 @@ import urllib2
 import urlparse
 from optparse import make_option
 
+from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
 from .compress_geonames import GEONAMES_DATA, GEONAMES_DATA_PC
